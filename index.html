@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>10のまとまり さんすう</title>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column, big touch targets. Board (10のぼう / ばら) sits between the equation and the number pad. */
+:root {
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --soft: #e3ecf1;
+  --ink: #1b2733;
+  --muted: #566673;
+  --line: #cdd6de;
+  --ten: #1c6e8c;
+  --ten-ink: #ffffff;
+  --blue: #2f6ad0;
+  --orange: #cf7410;
+  --green: #2a9560;
+  --ok: #1f7a4d;
+  --alert: #d62828;
+  --warn: #b5470d;
+  --font: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12181e; --surface: #1b242c; --soft: #222e38; --ink: #e6edf2; --muted: #9db0bf; --line: #33424e;
+    --ten: #4fb0d1; --ten-ink: #0c1a22; --blue: #6f9cf0; --orange: #f0a64a; --green: #4cc088; --ok: #5fd29a; --warn: #f19a5f; --alert: #ff6b6b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12181e; --surface: #1b242c; --soft: #222e38; --ink: #e6edf2; --muted: #9db0bf; --line: #33424e;
+  --ten: #4fb0d1; --ten-ink: #0c1a22; --blue: #6f9cf0; --orange: #f0a64a; --green: #4cc088; --ok: #5fd29a; --warn: #f19a5f; --alert: #ff6b6b;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.5;
+  padding-inline: 16px; padding-block: 8px 12px; margin: 0;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid var(--ten); outline-offset: 2px; }
+.app { max-width: 560px; margin-inline: auto; display: flex; flex-direction: column; gap: 8px; }
+.cols, .colL, .colR { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+@media (min-width: 700px) and (orientation: landscape) {
+  .app { max-width: 980px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+}
+
+header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+h1 { font-size: 16px; margin: 0; letter-spacing: .02em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hdr-right { display: flex; align-items: center; gap: 6px; flex: none; }
+.stars { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--orange); min-width: 2.8em; text-align: right; }
+.chip {
+  min-height: 36px; padding: 2px 10px; border-radius: 18px; border: 2px solid var(--line);
+  background: var(--surface); font-size: 14px;
+}
+.chip[aria-pressed="true"] { background: var(--ten); color: var(--ten-ink); border-color: var(--ten); }
+
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.tab {
+  min-height: 40px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface);
+  font-weight: 700; font-size: 15px; padding: 2px 4px;
+}
+.tab[aria-pressed="true"] { background: var(--ten); border-color: var(--ten); color: var(--ten-ink); }
+
+.card { background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; min-width: 0; }
+
+/* equation + sakuranbo */
+.eqrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.eq { display: flex; align-items: baseline; gap: 8px; font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; flex-wrap: nowrap; white-space: nowrap; }
+.eq .op { color: var(--muted); }
+.hl { color: var(--blue); border-bottom: 4px solid var(--blue); }
+.bc { display: inline-block; width: 1.05em; height: 1.05em; border: 3px solid var(--orange); border-radius: 50%; vertical-align: -0.18em; margin-inline: 2px; }
+.hl3 { color: var(--green); border-bottom: 4px solid var(--green); }
+.hl2 { color: var(--orange); border-bottom: 4px solid var(--orange); }
+#promptText .hl, #promptText .hl2, #promptText .hl3 { border-bottom-width: 3px; }
+.eq .res { min-width: 1.6em; text-align: center; border-bottom: 4px solid var(--line); }
+.eq .res.done { border-color: var(--ok); color: var(--ok); }
+#cherry { width: 92px; flex: none; }
+#cherry line { stroke: var(--muted); stroke-width: 3; }
+#cherry circle { stroke-width: 3; }
+#cherry .cT { fill: var(--soft); stroke: var(--orange); }
+#cherry .cL { fill: var(--surface); stroke: var(--green); }
+#cherry .cR { fill: var(--surface); stroke: var(--orange); }
+#cherry[data-m="sub"] .cT { stroke: var(--muted); }
+#cherry[data-m="sub"] .cL { stroke: var(--ten); }
+#cherry[data-m="sub"] .cR { stroke: var(--blue); }
+#cherry text { font-size: 25px; font-weight: 700; fill: var(--ink); text-anchor: middle; dominant-baseline: central; font-family: var(--font); }
+
+/* board */
+.board { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 10px; }
+.panel { background: var(--soft); border-radius: 10px; padding: 6px 8px; min-height: 130px; min-width: 0; }
+.panel h2 { font-size: 14px; margin: 0 0 3px; color: var(--ink); font-weight: 700; line-height: 1.3; }
+.panel h2 small { display: inline; margin-left: 5px; font-size: 11px; color: var(--muted); font-weight: 400; }
+.panel .none { color: var(--muted); opacity: .6; margin: 12px 0 0; text-align: center; font-size: 14px; }
+#tens { display: flex; flex-direction: column; gap: 2px; }
+.bar { display: flex; gap: 2px; padding: 2px; border: 0; border-radius: 5px; background: var(--ten); height: 15px; width: 100%; max-width: 220px; }
+.bar i { flex: 1; background: var(--ten-ink); opacity: .28; border-radius: 2px; }
+button.bar { cursor: pointer; }
+#ones { display: flex; flex-direction: column; gap: 5px; }
+.frame { display: grid; grid-template-columns: repeat(5, minmax(0, 34px)); justify-content: center; gap: 4px; padding: 4px; border: 2px solid var(--line); border-radius: 6px; background: var(--surface); }
+.dot { aspect-ratio: 1; border-radius: 50%; border: 0; padding: 0; min-width: 0; }
+.dot.empty { background: transparent; border: 2px dashed var(--line); }
+.dot.ghost { background: transparent; border: 3px dashed var(--orange); }
+.dot.blue { background: var(--blue); }
+.dot.orange { background: var(--orange); }
+.dot.ten { background: var(--ten); }
+.dot.green { background: var(--green); box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 7px var(--green); }
+.pulse { animation: pulse 1s ease-in-out infinite; outline: 3px solid var(--ten); outline-offset: 1px; }
+.dot.empty.pulse { outline-color: var(--green); }
+@keyframes pulse { 50% { transform: scale(1.12); } }
+.panel h2.hasval { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.panel h2 .val { font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--blue); }
+.panel h2 .val small { display: inline; font-size: 13px; margin-left: 2px; color: var(--muted); }
+.placegrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.placegrid .btn { padding-inline: 4px; min-height: 44px; font-size: 16px; }
+#pBundle { grid-column: span 2; }
+#placeTarget { padding-block: 6px; }
+.tgt { display: flex; align-items: baseline; gap: 8px; }
+#placeTarget .target { font-size: 28px; line-height: 1.2; }
+#placeTarget .btn { min-height: 40px; padding: 4px 12px; font-size: 15px; }
+.totals { margin: 4px 0 0; text-align: center; font-variant-numeric: tabular-nums; }
+.totals b { font-size: 22px; }
+
+/* coach */
+#promptText { font-size: 16px; font-weight: 700; margin: 0; line-height: 1.45; min-height: 2.9em; }
+.speak { flex: none; width: 44px; min-height: 36px; padding: 0; border-radius: 18px; border: 2px solid var(--ten); background: var(--surface); font-size: 17px; }
+#fb { min-height: 1.4em; margin: 2px 0 0; font-weight: 700; font-size: 15px; }
+#fb.ok { color: var(--ok); }
+#fb.hint { color: var(--warn); }
+
+/* answer boxes + pad */
+.ansrow { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 5px; }
+.ans { display: flex; align-items: center; gap: 8px; }
+.ans span { width: 40px; height: 42px; border: 3px solid var(--line); border-radius: 8px; display: grid; place-items: center; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--surface); }
+.ans span.ok { border-color: var(--ok); color: var(--ok); }
+.ans span.bad { border-color: var(--warn); color: var(--warn); animation: shake .3s; }
+@keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.pad { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.key { min-height: 42px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); font-size: 22px; font-weight: 700; }
+.key:active { background: var(--soft); }
+.key.del { min-height: 42px; padding-inline: 12px; font-size: 15px; }
+
+/* actions */
+.btn { min-height: 46px; padding: 6px 16px; border-radius: 12px; border: 2px solid var(--ten); background: var(--surface); font-weight: 700; font-size: 17px; }
+.btn.primary { background: var(--ten); color: var(--ten-ink); }
+.btn:disabled { opacity: .4; cursor: default; }
+#actions, .rowbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+#actions:empty { display: none; }
+.btn.pulse { outline-offset: 3px; }
+/* the part to operate right now: thick red frame */
+.card.need-action, .btn.need-action { border-color: var(--alert); box-shadow: inset 0 0 0 3px var(--alert); }
+
+.challenge { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.target { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: flex; align-items: center; }
+.custom { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.sheet { position: fixed; inset-inline: 16px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-width: 528px; margin-inline: auto; z-index: 10; box-shadow: 0 10px 34px rgba(0, 0, 0, .4); padding: 12px; }
+.sheet-h { margin: 10px 0 0; font-weight: 700; }
+.custom input { width: 4.5em; min-height: 48px; font-size: 22px; text-align: center; border: 2px solid var(--line); border-radius: 8px; background: var(--surface); }
+#cMsg { margin: 6px 0 0; font-size: 15px; color: var(--warn); min-height: 1.4em; }
+.note { color: var(--muted); font-size: 14px; margin: 0; }
+[hidden] { display: none !important; }
+
+@media (max-width: 699px) {
+  h1 { display: none; }
+  header { justify-content: flex-end; }
+}
+@media (max-width: 400px) {
+  .eq { font-size: 28px; gap: 4px; }
+  #cherry { width: 88px; }
+}
+/* short screens: tighten everything a little more so nothing has to scroll */
+@media (max-height: 720px) {
+  body { padding-block: 6px 8px; }
+  .app, .cols, .colL, .colR { gap: 6px; }
+  .card { padding: 6px 8px; }
+  .tab { min-height: 36px; font-size: 14px; }
+  .chip, .speak { min-height: 32px; }
+  .eq { font-size: 26px; }
+  #cherry { width: 78px; }
+  .panel { min-height: 104px; padding: 5px 6px; }
+  .frame { grid-template-columns: repeat(5, minmax(0, 27px)); gap: 3px; padding: 3px; }
+  #ones { gap: 4px; }
+  .bar { height: 13px; padding: 2px; }
+  #promptText { font-size: 15px; }
+  #fb { min-height: 1.3em; font-size: 14px; }
+  .key, .key.del { min-height: 38px; }
+  .ans span { width: 36px; height: 38px; font-size: 22px; }
+  .btn { min-height: 40px; }
+  .placegrid .btn { min-height: 40px; font-size: 15px; }
+  #placeTarget .btn { min-height: 36px; }
+  #placeTarget .target { font-size: 24px; }
+}
+@media (max-height: 600px) {
+  body { padding-block: 4px 6px; }
+  .app, .cols, .colL, .colR { gap: 4px; }
+  .tab { min-height: 32px; font-size: 13px; }
+  .eq { font-size: 22px; }
+  #cherry { width: 64px; }
+  .panel { min-height: 90px; }
+  .frame { grid-template-columns: repeat(5, minmax(0, 22px)); }
+  .bar { height: 11px; padding: 1px 2px; }
+  #promptText { font-size: 14px; }
+  .key, .key.del { min-height: 34px; }
+  .ans span { width: 32px; height: 34px; font-size: 20px; }
+  .btn, .placegrid .btn { min-height: 36px; }
+  .panel h2 small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse, .ans span.bad { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>10のまとまり さんすう</h1>
+    <div class="hdr-right">
+      <button class="chip" id="btnSet" type="button" aria-pressed="false" hidden>せってい</button>
+      <button class="chip" id="btnAuto" type="button" aria-pressed="false">よみあげ</button>
+      <button class="speak" id="btnSpeak" type="button" aria-label="もんだいを よみあげる">🔊</button>
+      <span class="stars" id="stars" aria-label="できた かず">★ 0</span>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="べんきょうの しゅるい">
+    <button class="tab" type="button" data-mode="place" aria-pressed="true">① 10と ばら</button>
+    <button class="tab" type="button" data-mode="add" aria-pressed="false">② たしざん</button>
+    <button class="tab" type="button" data-mode="sub" aria-pressed="false">③ ひきざん</button>
+  </nav>
+
+  <div class="cols">
+    <div class="colL">
+      <section class="card" id="eqCard" hidden>
+        <div class="eqrow">
+          <div class="eq" id="eq" aria-live="polite">
+            <span id="eqA">8</span><span class="op" id="eqOp">＋</span><span id="eqB" class="hl2">5</span><span class="op">＝</span><span class="res" id="eqR">□</span>
+          </div>
+          <svg id="cherry" viewBox="0 0 150 90" role="img" aria-label="さくらんぼ けいさん">
+            <line x1="75" y1="26" x2="35" y2="58"/><line x1="75" y1="26" x2="115" y2="58"/>
+            <circle class="cT" cx="75" cy="22" r="19"/><text id="cT" x="75" y="23"></text>
+            <circle class="cL" cx="35" cy="64" r="21"/><text id="cL" x="35" y="65"></text>
+            <circle class="cR" cx="115" cy="64" r="21"/><text id="cR" x="115" y="65"></text>
+          </svg>
+        </div>
+      </section>
+
+      <section class="card" id="placeTarget" aria-label="つくる かず" hidden>
+        <div class="challenge">
+          <div class="tgt"><span class="note">この かずを つくろう</span><span class="target" id="pTarget">25</span></div>
+          <div class="rowbtns">
+            <button class="btn primary" type="button" id="pCheck">できた！</button>
+            <button class="btn" type="button" id="pNew">ほかの かず</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="boardCard" aria-label="ブロック">
+        <div class="board">
+          <div class="panel"><h2>10の ぼう<small>十のくらい</small></h2><div id="tens"></div></div>
+          <div class="panel"><h2 class="hasval"><span>ばら<small>一のくらい</small></span><b class="val" id="onesVal" hidden><span id="onesNum">0</span><small>こ</small></b></h2><div id="ones"></div></div>
+        </div>
+        <p class="totals" id="totals" hidden></p>
+      </section>
+
+      <section class="card need-action" id="placeBtns" aria-label="ブロックを うごかす" hidden>
+        <div class="placegrid">
+          <button class="btn" type="button" id="pAdd">＋ ばら 1こ</button>
+          <button class="btn" type="button" id="pSub">− ばら 1こ</button>
+          <button class="btn" type="button" id="pClear">ぜんぶ けす</button>
+          <button class="btn primary" type="button" id="pBundle">10こを まとめる</button>
+          <button class="btn" type="button" id="pBreak">ぼうを ほどく</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="colR">
+      <section class="card">
+        <div class="coach">
+          <p id="promptText" aria-live="polite">よみこみちゅう…</p>
+        </div>
+        <p id="fb" role="status"></p>
+        <div id="actions"></div>
+      </section>
+
+      <section class="card need-action" id="padCard" hidden>
+        <div class="ansrow">
+          <div class="ans" id="ans" aria-live="polite"></div>
+          <button class="key del" type="button" data-k="del">← けす</button>
+        </div>
+        <div class="pad" id="pad">
+          <button class="key" type="button" data-k="1">1</button><button class="key" type="button" data-k="2">2</button><button class="key" type="button" data-k="3">3</button><button class="key" type="button" data-k="4">4</button><button class="key" type="button" data-k="5">5</button>
+          <button class="key" type="button" data-k="6">6</button><button class="key" type="button" data-k="7">7</button><button class="key" type="button" data-k="8">8</button><button class="key" type="button" data-k="9">9</button><button class="key" type="button" data-k="0">0</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ほごしゃ むけ: opens over the page from the せってい button, so it never makes the page longer -->
+  <section class="card sheet" id="probCtl" aria-label="せってい" hidden>
+    <div class="seg" id="levelSeg" role="group" aria-label="もんだいの タイプ">
+      <button class="chip" type="button" data-lv="1" aria-pressed="true" id="lv1">8＋5 の タイプ</button>
+      <button class="chip" type="button" data-lv="2" aria-pressed="false" id="lv2">27＋5 の タイプ</button>
+    </div>
+    <p class="sheet-h">じぶんで もんだいを いれる</p>
+    <div class="custom">
+      <input id="cA" inputmode="numeric" pattern="[0-9]*" aria-label="ひだりの かず" placeholder="27">
+      <span id="cOp" style="font-size:24px;font-weight:700">＋</span>
+      <input id="cB" inputmode="numeric" pattern="[0-9]*" aria-label="みぎの かず" placeholder="5">
+      <button class="btn" type="button" id="cGo">はじめる</button>
+    </div>
+    <p id="cMsg" role="status"></p>
+    <p class="note">がっこうの しゅくだいを そのまま いれて れんしゅうできます。タップと すうじの ボタンだけで すすみ、かく ひつようも、じかんの せいげんも ありません。</p>
+  </section>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+
+const dom = {
+  tens: $('#tens'), ones: $('#ones'), totals: $('#totals'), prompt: $('#promptText'), fb: $('#fb'),
+  padCard: $('#padCard'), ans: $('#ans'), actions: $('#actions'), eqCard: $('#eqCard'),
+  placeTarget: $('#placeTarget'), placeBtns: $('#placeBtns'), onesVal: $('#onesVal'), onesNum: $('#onesNum'), probCtl: $('#probCtl'), stars: $('#stars')
+};
+
+/* ---------- state ---------- */
+let mode = 'place';
+let runId = 0;
+let padHandler = null;
+let scene = { tens: [], frames: [] };      // tens: [{tap,pulse}], frames: [[slot x10]], slot: {c,tap,pulse,removed}
+let level = Number(store.get('msm-level', '1')) === 2 ? 2 : 1;
+let stars = Number(store.get('msm-stars', '0')) || 0;
+let autoRead = store.get('msm-auto', '0') === '1';
+let place = { tens: 1, ones: 3, target: 25 };   // starts with an example (13) so the board is not empty
+let lastCustom = null;
+
+/* ---------- speech ---------- */
+function speakText(t) {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    const s = t.replace(/＋/g, ' たす ').replace(/[−－]/g, ' ひく ').replace(/＝/g, ' は ').replace(/[？□○]/g, ' なに ');
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(s);
+    u.lang = 'ja-JP'; u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+// «7» marks the ones digit (blue, like the blue ones); ‹4› the number being added/taken (orange, like the orange ones);
+// 〔3〕 the part that makes 10 (green, like the green dots and the left circle of the sakuranbo)
+function setPrompt(t, speak = true) {
+  dom.prompt.replaceChildren();
+  t.split(/([«‹〔].+?[»›〕])/).forEach(part => {
+    const m = /^([«‹〔])(.+)[»›〕]$/.exec(part);
+    if (m) dom.prompt.append(el('span', { '«': 'hl', '‹': 'hl2', '〔': 'hl3' }[m[1]], m[2]));
+    else part.split('○').forEach((seg, j) => {
+      if (j) { const c = el('span', 'bc'); c.setAttribute('role', 'img'); c.setAttribute('aria-label', 'まる'); dom.prompt.append(c); }
+      if (seg) dom.prompt.append(document.createTextNode(seg));
+    });
+  });
+  if (speak && autoRead) speakText(t.replace(/[«»‹›〔〕]/g, ''));
+}
+function setFb(t, cls) { dom.fb.textContent = t || ''; dom.fb.className = cls || ''; }
+
+/* ---------- board ---------- */
+function makeFrame(n, c) {
+  return Array.from({ length: 10 }, (_, i) => i < n ? { c } : { c: 'empty' });
+}
+function draw() {
+  dom.tens.replaceChildren(); dom.ones.replaceChildren();
+  if (!scene.tens.length) dom.tens.append(el('p', 'none', 'なし'));
+  scene.tens.forEach(t => {
+    const b = el(t.tap ? 'button' : 'div', 'bar' + (t.pulse ? ' pulse' : ''));
+    for (let i = 0; i < 10; i++) b.append(el('i'));
+    if (t.tap) {
+      b.type = 'button';
+      b.setAttribute('aria-label', '10の ぼう。タップすると ばらに ほどけます');
+      b.addEventListener('click', t.tap);
+    }
+    dom.tens.append(b);
+  });
+  if (!scene.frames.length) dom.ones.append(el('p', 'none', 'なし'));
+  scene.frames.forEach(f => {
+    const fr = el('div', 'frame');
+    f.forEach(s => {
+      // an orange dot that was moved away stays behind as an orange dashed outline
+      const kind = s.removed ? (s.c === 'orange' ? 'ghost' : 'empty') : s.c;
+      const d = el(s.tap ? 'button' : 'div', 'dot ' + kind + (s.pulse ? ' pulse' : ''));
+      if (s.tap) { d.type = 'button'; d.setAttribute('aria-label', 'タップして とる'); d.addEventListener('click', s.tap); }
+      fr.append(d);
+    });
+    dom.ones.append(fr);
+  });
+}
+
+/* ---------- equation + sakuranbo ---------- */
+function setEq(a, op, b, r) {
+  const A = $('#eqA'), str = String(a);
+  A.replaceChildren(document.createTextNode(str.slice(0, -1)), el('span', 'hl', str.slice(-1)));
+  $('#eqOp').textContent = op; $('#eqB').textContent = b;
+  const R = $('#eqR'); R.textContent = r == null ? '□' : r; R.classList.toggle('done', r != null);
+}
+function setCherry(top, left, right, kind) {
+  const svg = $('#cherry');
+  svg.dataset.m = kind || 'add';
+  svg.style.visibility = top == null ? 'hidden' : 'visible';
+  $('#cT').textContent = top == null ? '' : top;
+  $('#cL').textContent = left == null ? '' : left;      // blank = empty circle (the equation's blank is □)
+  $('#cR').textContent = right == null ? '' : right;
+}
+
+/* ---------- pad ---------- */
+function showPad(on, len) {
+  dom.padCard.hidden = !on;
+  if (!on) padHandler = null;
+}
+function renderAns(buf, len, cls) {
+  dom.ans.replaceChildren();
+  for (let i = 0; i < len; i++) dom.ans.append(el('span', cls || '', buf[i] || ''));
+}
+function pressKey(k) { if (padHandler) padHandler(k); }
+document.querySelectorAll('#padCard .key').forEach(b => b.addEventListener('click', () => pressKey(b.dataset.k)));
+document.addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'INPUT') return;
+  if (/^[0-9]$/.test(e.key)) pressKey(e.key);
+  else if (e.key === 'Backspace') pressKey('del');
+});
+
+/* ---------- step helpers (each returns a Promise resolved when the child finishes the step) ---------- */
+function ask(text, answer, hint) {
+  const my = runId;
+  return new Promise(resolve => {
+    setPrompt(text); setFb('');
+    const len = String(answer).length;
+    let buf = '', wrong = 0, lock = false;
+    showPad(true); renderAns(buf, len);
+    const done = delay => setTimeout(() => { if (my !== runId) return; showPad(false); resolve(); }, delay);
+    padHandler = k => {
+      if (my !== runId || lock) return;
+      if (k === 'del') { buf = buf.slice(0, -1); renderAns(buf, len); return; }
+      if (buf.length >= len) return;
+      buf += k; renderAns(buf, len);
+      if (buf.length < len) return;
+      if (Number(buf) === answer) {
+        lock = true; renderAns(buf, len, 'ok'); setFb('せいかい！', 'ok'); done(800);
+      } else {
+        wrong++; renderAns(buf, len, 'bad');
+        if (wrong >= 2) {
+          lock = true; setFb(`こたえは ${answer} だよ。いっしょに すすもう。`, 'hint');
+          setTimeout(() => { if (my === runId) renderAns(String(answer), len, 'ok'); }, 700);
+          done(2400);
+        } else {
+          setFb(hint || 'もういちど やってみよう。', 'hint');
+          setTimeout(() => { if (my === runId) { buf = ''; renderAns(buf, len); } }, 600);
+        }
+      }
+    };
+  });
+}
+function act(text, label) {
+  const my = runId;
+  return new Promise(resolve => {
+    setPrompt(text); setFb('');
+    dom.actions.replaceChildren();
+    const b = el('button', 'btn primary pulse need-action', label); b.type = 'button';
+    b.addEventListener('click', () => { if (my !== runId) return; dom.actions.replaceChildren(); resolve(); });
+    dom.actions.append(b);
+  });
+}
+function needBoard(on) { $('#boardCard').classList.toggle('need-action', on); }
+function tapN(text, targets, onTap) {
+  const my = runId;
+  return new Promise(resolve => {
+    let left = targets.length;
+    needBoard(true);
+    const say = (speak) => setPrompt(`${text}（あと ${left}こ）`, speak);
+    say(true); setFb('');
+    targets.forEach(s => {
+      s.pulse = true;
+      s.tap = () => {
+        if (my !== runId) return;
+        s.removed = true; s.pulse = false; s.tap = null; left--;
+        if (onTap) onTap(s);
+        draw();
+        if (left > 0) say(false); else { needBoard(false); resolve(); }
+      };
+    });
+    draw();
+  });
+}
+function tapBar(text) {
+  const my = runId;
+  return new Promise(resolve => {
+    setPrompt(text); setFb('');
+    needBoard(true);
+    const bar = scene.tens[scene.tens.length - 1];
+    bar.pulse = true;
+    bar.tap = () => { if (my !== runId) return; scene.tens.pop(); needBoard(false); resolve(); };
+    draw();
+  });
+}
+
+/* ---------- problems ---------- */
+function resetProblemUI() {
+  showPad(false); dom.actions.replaceChildren(); setFb(''); needBoard(false);
+}
+function finish(summary, res, eqArgs) {
+  setEq(eqArgs[0], eqArgs[1], eqArgs[2], res);
+  stars++; store.set('msm-stars', String(stars)); renderStars();
+  setPrompt('やったね！ さいごまで できたよ。');
+  setFb(summary, 'ok');
+  dom.actions.replaceChildren();
+  const b = el('button', 'btn primary need-action', 'つぎの もんだい'); b.type = 'button';
+  b.addEventListener('click', () => { lastCustom = null; nextProblem(); });
+  dom.actions.append(b);
+}
+
+async function runAdd(a, b) {
+  const my = ++runId; resetProblemUI();
+  const t = Math.floor(a / 10), u = a % 10, need = 10 - u, d = b - need, res = a + b;
+  setEq(a, '＋', b, null); setCherry(b, null, null);
+  scene = { tens: Array.from({ length: t }, () => ({})), frames: [makeFrame(u, 'blue'), makeFrame(b, 'orange')] };
+  scene.frames[0].forEach(s => { if (s.c === 'empty') s.pulse = true; });
+  draw();
+  await ask(`${a} の 一のくらいは «${u}»。あと いくつで 10に なるかな？`, need, `ひかっている ○を かぞえよう。${need}こ あると 10に なるよ。`);
+  scene.frames[0].forEach(s => { s.pulse = false; });
+  if (my !== runId) return;
+  setCherry(b, need, null);
+  const filler = s => { const e = scene.frames[0].find(x => x.c === 'empty'); if (e) e.c = 'green'; };
+  await tapN(`オレンジの ●を タップして、10に しよう。`, scene.frames[1].slice(0, need), filler);
+  if (my !== runId) return;
+  if (d > 0) {
+    await ask(`‹${b}› を 〔${need}〕 と ○に わけたよ。○は いくつ？`, d, `${b} − ${need} を けいさんしよう。`);
+    if (my !== runId) return;
+  }
+  setCherry(b, need, d);
+  await act('10こ あつまったね。10の ぼうに まとめよう。', '10こを まとめる');
+  if (my !== runId) return;
+  scene.tens.push({});
+  scene.frames = [scene.frames[1]];   // keep the orange frame so the moved dots stay as dashed outlines
+  draw();
+  const q = d > 0 ? `10の ぼうが ${t + 1}ほん、ばらが ${d}こ。ぜんぶで いくつ？` : `10の ぼうが ${t + 1}ほん。ぜんぶで いくつ？`;
+  await ask(q, res, `10の ぼう ${t + 1}ほんは ${(t + 1) * 10}。${d > 0 ? `それに ${d} を たそう。` : ''}`);
+  if (my !== runId) return;
+  finish(`${a} ＋ ${b} ＝ ${res}`, res, [a, '＋', b]);
+}
+
+// Subtraction by 減加法: break a ten, take the number away from the 10, then add what is left to the ones.
+async function runSub(a, b) {
+  const my = ++runId; resetProblemUI();
+  const t = Math.floor(a / 10), x = a % 10, left = 10 - b, ones = left + x, res = a - b;
+  setEq(a, '−', b, null); setCherry(null);
+  scene = { tens: Array.from({ length: t }, () => ({})), frames: x > 0 ? [makeFrame(x, 'blue')] : [] };
+  draw();
+  await tapBar(`${x > 0 ? `${a} の 一のくらいは «${x}»。` : ''}ばらが たりないね。10の ぼうを 1ほん タップして ほどこう。`);
+  if (my !== runId) return;
+  const ten = makeFrame(10, 'ten');
+  ten.slice(0, b).forEach(d => { d.c = 'orange'; });            // the dots to take away
+  scene.frames = [ten].concat(scene.frames);
+  if (x > 0) setCherry(10 + x, 10, x, 'sub');
+  draw();
+  await tapN(`ほどいた 10こから ‹${b}›こ、オレンジの ●を タップして とろう。`, ten.slice(0, b));
+  if (my !== runId) return;
+  await ask(`10 − ‹${b}› ＝ いくつ？`, left, `10こから ${b}こ とると のこりは？`);
+  if (my !== runId) return;
+  if (x > 0) {
+    await ask(`のこりの ${left}こと、もとの ばら «${x}»こを あわせると いくつ？`, ones, `${left} ＋ ${x} を けいさんしよう。`);
+    if (my !== runId) return;
+  }
+  if (t > 1) {
+    await ask(`10の ぼうが ${t - 1}ほん、ばらが ${ones}こ。ぜんぶで いくつ？`, res, `10の ぼう ${t - 1}ほんは ${(t - 1) * 10}。それに ${ones} を たそう。`);
+    if (my !== runId) return;
+  }
+  finish(`${a} − ${b} ＝ ${res}`, res, [a, '−', b]);
+}
+
+function genAdd() {
+  let a, b;
+  if (level === 1) { do { a = rnd(2, 9); b = rnd(2, 9); } while (a + b < 11); }
+  else { do { a = rnd(12, 89); b = rnd(2, 9); } while (a % 10 === 0 || (a % 10) + b < 11); }
+  return [a, b];
+}
+function genSub() {
+  const x = rnd(1, 8), b = rnd(x + 1, 9);
+  const t = level === 1 ? 1 : rnd(2, 9);
+  return [10 * t + x, b];
+}
+function nextProblem() {
+  if (mode === 'add') { const [a, b] = lastCustom || genAdd(); runAdd(a, b); }
+  else if (mode === 'sub') { const [a, b] = lastCustom || genSub(); runSub(a, b); }
+}
+
+/* ---------- 10のまとまり (free play + challenge) ---------- */
+function placeTotal() { return place.tens * 10 + place.ones; }
+function placeRebuild() {
+  const canBreak = place.ones + 10 <= 19;
+  scene = {
+    tens: Array.from({ length: place.tens }, () => ({ tap: canBreak ? () => { place.tens--; place.ones += 10; setFb(''); placeRebuild(); } : null })),
+    frames: Array.from({ length: Math.ceil(place.ones / 10) }, (_, i) => makeFrame(Math.min(10, place.ones - i * 10), 'blue'))
+  };
+  draw();
+  const total = placeTotal();
+  dom.totals.hidden = false;
+  dom.onesVal.hidden = false; dom.onesNum.textContent = place.ones;
+  dom.totals.replaceChildren(
+    document.createTextNode('10の ぼう '), el('b', '', place.tens), document.createTextNode(' ほん ＋ ばら '),
+    el('b', '', place.ones), document.createTextNode(' こ ＝ '), el('b', '', total)
+  );
+  $('#pAdd').disabled = total >= 99;
+  $('#pSub').disabled = place.ones < 1;
+  $('#pBundle').disabled = place.ones < 10;
+  $('#pBundle').classList.toggle('pulse', place.ones >= 10);
+  $('#pBreak').disabled = !(place.tens >= 1 && canBreak);
+  $('#pTarget').textContent = place.target;
+}
+function startPlace() {
+  place = { tens: 1, ones: 3, target: rnd(12, 59) };
+  placeRebuild();
+  setPrompt('ばらを ふやして、10こに なったら「まとめる」。ぼうを タップすると ばらに もどるよ。');
+}
+$('#pAdd').addEventListener('click', () => {
+  if (placeTotal() >= 99) return;
+  place.ones++; setFb('');
+  placeRebuild();
+  if (place.ones === 10) setPrompt('10こに なったね！「10こを まとめる」を おそう。');
+});
+$('#pSub').addEventListener('click', () => { if (place.ones > 0) { place.ones--; setFb(''); placeRebuild(); } });
+$('#pBundle').addEventListener('click', () => { if (place.ones >= 10) { place.ones -= 10; place.tens++; setFb(''); placeRebuild(); } });
+$('#pBreak').addEventListener('click', () => { if (place.tens >= 1 && place.ones + 10 <= 19) { place.tens--; place.ones += 10; setFb(''); placeRebuild(); } });
+$('#pClear').addEventListener('click', () => { place.tens = 0; place.ones = 0; setFb(''); placeRebuild(); });
+$('#pNew').addEventListener('click', () => {
+  place.target = rnd(12, 59); place.tens = 0; place.ones = 0; setFb('');
+  placeRebuild(); setPrompt(`${place.target} を つくろう。10の ぼうが いくつ、ばらが いくつ？`);
+});
+$('#pCheck').addEventListener('click', () => {
+  const T = Math.floor(place.target / 10), U = place.target % 10, total = placeTotal();
+  if (place.tens === T && place.ones === U) {
+    setFb(`せいかい！ ${place.target} ＝ 10の ぼう ${T}ほん ＋ ばら ${U}こ`, 'ok');
+    stars++; store.set('msm-stars', String(stars)); renderStars();
+  } else if (total === place.target) {
+    setFb('かずは あっているよ。ばらが 10こ いじょう あるから、まとめてみよう。', 'hint');
+  } else if (total < place.target) {
+    setFb(`いまは ${total}。あと ${place.target - total} たりないよ。`, 'hint');
+  } else {
+    setFb(`いまは ${total}。${total - place.target} おおいよ。`, 'hint');
+  }
+});
+
+/* ---------- chrome ---------- */
+function renderStars() { dom.stars.textContent = '★ ' + stars; }
+function setLevel(l) {
+  level = l; store.set('msm-level', String(l));
+  $('#lv1').setAttribute('aria-pressed', String(l === 1));
+  $('#lv2').setAttribute('aria-pressed', String(l === 2));
+  const addMode = mode === 'add';
+  $('#lv1').textContent = addMode ? '8＋5 の タイプ' : '13−8 の タイプ';
+  $('#lv2').textContent = addMode ? '27＋5 の タイプ' : '43−8 の タイプ';
+}
+function setMode(m) {
+  runId++; mode = m; padHandler = null;
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-pressed', String(t.dataset.mode === m)));
+  resetProblemUI();
+  const prob = m !== 'place';
+  dom.eqCard.hidden = !prob; dom.probCtl.hidden = true; $('#btnSet').hidden = !prob; $('#btnSet').setAttribute('aria-pressed', 'false'); dom.placeTarget.hidden = prob; dom.placeBtns.hidden = prob; dom.onesVal.hidden = prob;
+  dom.totals.hidden = true;
+  lastCustom = null;
+  try { history.replaceState(null, '', '#' + m); } catch (e) {}
+  if (prob) {
+    $('#cOp').textContent = m === 'add' ? '＋' : '−';
+    $('#cMsg').textContent = '';
+    setLevel(level);
+    nextProblem();
+  } else {
+    startPlace();
+  }
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+function setSheet(on) { dom.probCtl.hidden = !on; $('#btnSet').setAttribute('aria-pressed', String(on)); }
+$('#btnSet').addEventListener('click', () => setSheet(dom.probCtl.hidden));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setSheet(false); });
+$('#lv1').addEventListener('click', () => { setLevel(1); lastCustom = null; setSheet(false); nextProblem(); });
+$('#lv2').addEventListener('click', () => { setLevel(2); lastCustom = null; setSheet(false); nextProblem(); });
+
+$('#cGo').addEventListener('click', () => {
+  const a = parseInt($('#cA').value, 10), b = parseInt($('#cB').value, 10), msg = $('#cMsg');
+  if (!Number.isInteger(a) || !Number.isInteger(b)) { msg.textContent = '2つの かずを いれてね。'; return; }
+  if (mode === 'add') {
+    if (a < 1 || a > 89 || b < 1 || b > 9) { msg.textContent = 'ひだりは 1〜89、みぎは 1〜9 の かずに してね。'; return; }
+    if ((a % 10) + b < 10 || a + b > 99) { msg.textContent = 'くりあがりが ある もんだいを いれてね。（一のくらいの たしざんが 10 いじょう、こたえは 99 まで）'; return; }
+  } else {
+    if (a < 10 || a > 99 || b < 1 || b > 9) { msg.textContent = 'ひだりは 10〜99、みぎは 1〜9 の かずに してね。'; return; }
+    if (a % 10 >= b) { msg.textContent = 'くりさがりが ある もんだいを いれてね。（一のくらいが たりない もんだい）'; return; }
+  }
+  msg.textContent = '';
+  lastCustom = [a, b];
+  setSheet(false);
+  nextProblem();
+});
+
+$('#btnSpeak').addEventListener('click', () => speakText(dom.prompt.textContent));
+$('#btnAuto').addEventListener('click', () => {
+  autoRead = !autoRead; store.set('msm-auto', autoRead ? '1' : '0');
+  $('#btnAuto').setAttribute('aria-pressed', String(autoRead));
+  if (autoRead) speakText(dom.prompt.textContent);
+});
+
+// iPad (portrait): there is room to spare, so enlarge the whole UI as much as fits the screen.
+// 710 = tallest content (e.g. 88＋9) and 560 = the app's width, both at normal size.
+function fitTablet() {
+  const w = window.innerWidth, h = window.innerHeight;
+  let z = 1;
+  if (w >= 700 && h >= w) z = Math.max(1, Math.min(1.6, (h - 12) / 710, (w - 32) / 560));
+  $('.app').style.zoom = String(Math.round(z * 100) / 100);
+}
+window.addEventListener('resize', fitTablet);
+window.addEventListener('orientationchange', fitTablet);
+fitTablet();
+$('#btnAuto').setAttribute('aria-pressed', String(autoRead));
+renderStars();
+const startMode = (location.hash || '').slice(1);
+setMode(['place', 'add', 'sub'].includes(startMode) ? startMode : 'place');
+})();
+</script>
+</body>
+</html>
