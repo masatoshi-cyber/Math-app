@@ -55,7 +55,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
 header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 h1 { font-size: 16px; margin: 0; letter-spacing: .02em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hdr-right { display: flex; align-items: center; gap: 6px; flex: none; }
-.stars { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--orange); min-width: 2.8em; text-align: right; }
+.chip.stars { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--orange); min-width: 3.6em; text-align: center; }
 .chip {
   min-height: 36px; padding: 2px 10px; border-radius: 18px; border: 2px solid var(--line);
   background: var(--surface); font-size: 14px;
@@ -83,6 +83,7 @@ h1 { font-size: 16px; margin: 0; letter-spacing: .02em; min-width: 0; overflow: 
 .eq .res { min-width: 1.6em; text-align: center; border-bottom: 4px solid var(--line); }
 .eq .res.done { border-color: var(--ok); color: var(--ok); }
 #cherry { width: 92px; flex: none; }
+#cherry[data-m="sub"] { width: 124px; }   /* the subtraction sakuranbo has more rows, so it is drawn larger */
 #cherry line { stroke: var(--muted); stroke-width: 3; }
 #cherry circle { stroke-width: 3; }
 #cherry .cT { fill: var(--soft); stroke: var(--orange); }
@@ -91,6 +92,11 @@ h1 { font-size: 16px; margin: 0; letter-spacing: .02em; min-width: 0; overflow: 
 #cherry[data-m="sub"] .cT { stroke: var(--muted); }
 #cherry[data-m="sub"] .cL { stroke: var(--ten); }
 #cherry[data-m="sub"] .cR { stroke: var(--blue); }
+#cherry .cA { fill: var(--surface); stroke: var(--ten); }
+#cherry .cB { fill: var(--surface); stroke: var(--blue); }
+#cherry .cF { fill: var(--surface); stroke: var(--ok); }
+#cherry text.lab { fill: var(--orange); font-size: 21px; text-anchor: start; }
+#cherry text.op { fill: var(--muted); font-size: 24px; }
 #cherry text { font-size: 25px; font-weight: 700; fill: var(--ink); text-anchor: middle; dominant-baseline: central; font-family: var(--font); }
 
 /* board */
@@ -132,7 +138,7 @@ button.bar { cursor: pointer; }
 .totals b { font-size: 22px; }
 
 /* coach */
-.coach { display: flex; align-items: center; gap: 8px; }
+.coach { display: flex; align-items: flex-start; gap: 8px; }
 #promptText { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; margin: 0; line-height: 1.45; min-height: 2.9em; }
 .speak { flex: none; width: 44px; min-height: 36px; padding: 0; border-radius: 18px; border: 2px solid var(--ten); background: var(--surface); font-size: 17px; }
 #fb { min-height: 1.4em; margin: 2px 0 0; font-weight: 700; font-size: 15px; }
@@ -168,6 +174,23 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
 .custom { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
 .sheet { position: fixed; inset-inline: 16px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-width: 528px; margin-inline: auto; z-index: 10; box-shadow: 0 10px 34px rgba(0, 0, 0, .4); padding: 12px; }
 .sheet-h { margin: 10px 0 0; font-weight: 700; }
+.sheet { overflow-y: auto; }
+.sheet-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.today { margin: 6px 0 2px; font-size: 22px; font-weight: 700; }
+.legend { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
+.lg { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin: 0 4px 0 8px; vertical-align: -1px; }
+.lg:first-child { margin-left: 0; }
+.lg-ok { background: var(--ok); }
+.lg-help { background: var(--orange); }
+.hist { display: grid; gap: 4px; margin-bottom: 6px; }
+.hrow { display: grid; grid-template-columns: 5.4em minmax(0, 1fr) 2.2em; gap: 6px; align-items: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+.hrow .hd { color: var(--muted); }
+.hrow.is-today .hd { color: var(--ink); font-weight: 700; }
+.hbar { display: flex; height: 16px; background: var(--soft); border-radius: 8px; overflow: hidden; }
+.hs-ok { background: var(--ok); }
+.hs-help { background: var(--orange); }
+.hrow .hn { text-align: right; font-weight: 700; }
+#histText { width: 100%; margin-top: 6px; font: inherit; font-size: 14px; border: 2px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); padding: 6px; }
 .custom input { width: 4.5em; min-height: 48px; font-size: 22px; text-align: center; border: 2px solid var(--line); border-radius: 8px; background: var(--surface); }
 #cMsg { margin: 6px 0 0; font-size: 15px; color: var(--warn); min-height: 1.4em; }
 .note { color: var(--muted); font-size: 14px; margin: 0; }
@@ -180,9 +203,10 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
 @media (max-width: 400px) {
   .eq { font-size: 28px; gap: 4px; }
   #cherry { width: 88px; }
+  #cherry[data-m="sub"] { width: 116px; }
 }
 /* short screens: tighten everything a little more so nothing has to scroll */
-@media (max-height: 720px) {
+@media (max-height: 800px) {
   body { padding-block: 6px 8px; }
   .app, .cols, .colL, .colR { gap: 6px; }
   .card { padding: 6px 8px; }
@@ -190,6 +214,7 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
   .chip, .speak { min-height: 32px; }
   .eq { font-size: 26px; }
   #cherry { width: 78px; }
+  #cherry[data-m="sub"] { width: 82px; }
   .panel { min-height: 104px; padding: 5px 6px; }
   .frame { grid-template-columns: repeat(5, minmax(0, 27px)); gap: 3px; padding: 3px; }
   #ones { gap: 4px; }
@@ -209,6 +234,7 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
   .tab { min-height: 32px; font-size: 13px; }
   .eq { font-size: 22px; }
   #cherry { width: 64px; }
+  #cherry[data-m="sub"] { width: 72px; }
   .panel { min-height: 90px; }
   .frame { grid-template-columns: repeat(5, minmax(0, 22px)); }
   .bar { height: 11px; padding: 1px 2px; }
@@ -231,7 +257,7 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
       <button class="chip" id="btnSet" type="button" aria-pressed="false" hidden>せってい</button>
       <button class="chip" id="btnAuto" type="button" aria-pressed="false">よみあげ</button>
       <button class="speak" id="btnSpeak" type="button" aria-label="もんだいを よみあげる">🔊</button>
-      <span class="stars" id="stars" aria-label="できた かず">★ 0</span>
+      <button class="chip stars" id="stars" type="button" aria-pressed="false" aria-label="きょうの きろくを みる">★ 0</button>
     </div>
   </header>
 
@@ -289,6 +315,19 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
             <circle class="cT" cx="75" cy="22" r="19"/><text id="cT" x="75" y="23"></text>
             <circle class="cL" cx="35" cy="64" r="21"/><text id="cL" x="35" y="65"></text>
             <circle class="cR" cx="115" cy="64" r="21"/><text id="cR" x="115" y="65"></text>
+            <g id="sA" hidden>
+              <line x1="35" y1="86" x2="35" y2="108"/><text id="sxM" class="lab" x="49" y="98"></text>
+              <circle class="cA" cx="35" cy="126" r="17"/><text id="sxA" x="35" y="127"></text>
+            </g>
+            <g id="sB" hidden>
+              <line x1="115" y1="86" x2="115" y2="108"/>
+              <circle class="cB" cx="115" cy="126" r="17"/><text id="sxB" x="115" y="127"></text>
+              <text class="op" x="75" y="127">＋</text>
+            </g>
+            <g id="sF" hidden>
+              <line x1="35" y1="143" x2="75" y2="156"/><line x1="115" y1="143" x2="75" y2="156"/>
+              <circle class="cF" cx="75" cy="170" r="17"/><text id="sxF" x="75" y="171"></text>
+            </g>
           </svg>
         </div>
         <p id="fb" role="status"></p>
@@ -307,6 +346,21 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
       </section>
     </div>
   </div>
+
+  <!-- きろく: how many problems were solved each day (opened from the ★ button) -->
+  <section class="card sheet" id="histSheet" aria-label="きろく" hidden>
+    <div class="sheet-top"><b>きろく</b><button class="chip" id="histClose" type="button">とじる</button></div>
+    <p class="today" id="histToday"></p>
+    <p class="legend"><i class="lg lg-ok"></i>たすけなしで できた <i class="lg lg-help"></i>ヒントを つかった</p>
+    <div class="hist" id="histList"></div>
+    <p class="note" id="histTotal"></p>
+    <div class="rowbtns">
+      <button class="btn" type="button" id="histCopy">きろくを コピー</button>
+      <button class="btn" type="button" id="histClear">きろくを けす</button>
+    </div>
+    <p class="note" id="histMsg" role="status"></p>
+    <textarea id="histText" readonly hidden rows="5" aria-label="きろく（コピーようの テキスト）"></textarea>
+  </section>
 
   <!-- ほごしゃ むけ: opens over the page from the せってい button, so it never makes the page longer -->
   <section class="card sheet" id="probCtl" aria-label="せってい" hidden>
@@ -349,7 +403,10 @@ let runId = 0;
 let padHandler = null;
 let scene = { tens: [], frames: [] };      // tens: [{tap,pulse}], frames: [[slot x10]], slot: {c,tap,pulse,removed}
 let level = Number(store.get('msm-level', '1')) === 2 ? 2 : 1;
-let stars = Number(store.get('msm-stars', '0')) || 0;
+// history: { 'YYYY-MM-DD': { t: problems finished, u: finished without any hint } } in the browser of this device only
+let hist = {};
+try { const h = JSON.parse(store.get('msm-history', '{}')); if (h && typeof h === 'object' && !Array.isArray(h)) hist = h; } catch (e) { hist = {}; }
+let helped = false;                 // a hint or the answer was shown during the current problem
 let autoRead = store.get('msm-auto', '0') === '1';
 let place = { tens: 1, ones: 3, target: 25 };   // starts with an example (13) so the board is not empty
 let lastCustom = null;
@@ -422,10 +479,21 @@ function setEq(a, op, b, r) {
 function setCherry(top, left, right, kind) {
   const svg = $('#cherry');
   svg.dataset.m = kind || 'add';
+  svg.setAttribute('viewBox', kind === 'sub' ? '0 0 150 190' : '0 0 150 90');   // subtraction has two more rows
+  if (kind !== 'sub') setCherrySub({});
   svg.style.visibility = top == null ? 'hidden' : 'visible';   // keeps its space so the prompt does not reflow
   $('#cT').textContent = top == null ? '' : top;
   $('#cL').textContent = left == null ? '' : left;      // blank = empty circle (the equation's blank is □)
   $('#cR').textContent = right == null ? '' : right;
+}
+
+// Subtraction (減加法) sakuranbo, revealed step by step: 10 −8 → [2], then [2] ＋ [3] → [5]
+//   st.label: "−8" (shown with the first extra circle), st.a: its value ('' = blank), st.x: the ones, st.f: the final value
+function setCherrySub(st) {
+  const on = (id, v) => $(id).toggleAttribute('hidden', !v);
+  on('#sA', st.a !== undefined); $('#sxM').textContent = st.label || ''; $('#sxA').textContent = st.a === undefined ? '' : st.a;
+  on('#sB', st.x !== undefined); $('#sxB').textContent = st.x === undefined ? '' : st.x;
+  on('#sF', st.f !== undefined); $('#sxF').textContent = st.f === undefined ? '' : st.f;
 }
 
 /* ---------- pad ---------- */
@@ -463,7 +531,7 @@ function ask(text, answer, hint) {
       if (Number(buf) === answer) {
         lock = true; renderAns(buf, len, 'ok'); setFb('せいかい！', 'ok'); done(800);
       } else {
-        wrong++; renderAns(buf, len, 'bad');
+        wrong++; helped = true; renderAns(buf, len, 'bad');
         if (wrong >= 2) {
           lock = true; setFb(`こたえは ${answer} だよ。いっしょに すすもう。`, 'hint');
           setTimeout(() => { if (my === runId) renderAns(String(answer), len, 'ok'); }, 700);
@@ -521,11 +589,11 @@ function tapBar(text) {
 
 /* ---------- problems ---------- */
 function resetProblemUI() {
-  showPad(false); dom.actions.replaceChildren(); setFb(''); needBoard(false);
+  showPad(false); dom.actions.replaceChildren(); setFb(''); needBoard(false); helped = false;
 }
 function finish(summary, res, eqArgs) {
   setEq(eqArgs[0], eqArgs[1], eqArgs[2], res);
-  stars++; store.set('msm-stars', String(stars)); renderStars();
+  recordSolved(!helped);
   setPrompt('やったね！ さいごまで できたよ。');
   setFb(summary, 'ok');
   dom.actions.replaceChildren();
@@ -572,7 +640,7 @@ async function runAdd(a, b) {
 async function runSub(a, b) {
   const my = ++runId; resetProblemUI();
   const t = Math.floor(a / 10), x = a % 10, left = 10 - b, ones = left + x, res = a - b;
-  setEq(a, '−', b, null); setCherry(null);
+  setEq(a, '−', b, null); setCherry(null, null, null, 'sub'); setCherrySub({});   // hidden for now; keeps its (taller) space
   scene = { tens: Array.from({ length: t }, () => ({})), frames: x > 0 ? [makeFrame(x, 'blue')] : [] };
   if (x > 0) scene.frames[0].focus = 'blue';            // look at the ones (blue)
   draw();
@@ -582,7 +650,7 @@ async function runSub(a, b) {
   const ten = makeFrame(10, 'ten');
   ten.slice(0, b).forEach(d => { d.c = 'orange'; });            // the dots to take away
   scene.frames = [ten].concat(scene.frames);
-  if (x > 0) setCherry(10 + x, 10, x, 'sub');
+  if (x > 0) { setCherry(10 + x, 10, x, 'sub'); setCherrySub({ label: `−${b}`, a: '' }); }   // 10 −b → ○
   ten.focus = 'orange';                                   // the dots to take are in the ten frame
   draw();
   await tapN(`ほどいた 10こから ‹${b}›こ、オレンジの ●を タップして とろう。`, ten.slice(0, b));
@@ -590,11 +658,13 @@ async function runSub(a, b) {
   if (my !== runId) return;
   await ask(`10 − ‹${b}› ＝ いくつ？`, left, `10こから ${b}こ とると のこりは？`);
   if (my !== runId) return;
+  if (x > 0) setCherrySub({ label: `−${b}`, a: left, x, f: '' });   // 10 −b → 2, then 2 ＋ 3 → ○
   if (x > 0) {
     scene.frames[1].focus = 'blue'; draw();               // the left-over ten dots + the ones
     await ask(`のこりの ${left}こと、もとの ばら «${x}»こを あわせると いくつ？`, ones, `${left} ＋ ${x} を けいさんしよう。`);
     scene.frames[1].focus = null;
     if (my !== runId) return;
+    setCherrySub({ label: `−${b}`, a: left, x, f: ones });
   }
   ten.focus = null; draw();
   if (t > 1) {
@@ -644,7 +714,7 @@ function placeRebuild() {
   $('#pTarget').textContent = place.target;
 }
 function startPlace() {
-  place = { tens: 1, ones: 3, target: rnd(12, 59) };
+  place = { tens: 1, ones: 3, target: rnd(12, 59), counted: false, helped: false };
   placeRebuild();
   setPrompt('ばらを ふやして、10こに なったら「まとめる」。ぼうを タップすると ばらに もどるよ。');
 }
@@ -659,25 +729,68 @@ $('#pBundle').addEventListener('click', () => { if (place.ones >= 10) { place.on
 $('#pBreak').addEventListener('click', () => { if (place.tens >= 1 && place.ones + 10 <= 19) { place.tens--; place.ones += 10; setFb(''); placeRebuild(); } });
 $('#pClear').addEventListener('click', () => { place.tens = 0; place.ones = 0; setFb(''); placeRebuild(); });
 $('#pNew').addEventListener('click', () => {
-  place.target = rnd(12, 59); place.tens = 0; place.ones = 0; setFb('');
+  place.target = rnd(12, 59); place.tens = 0; place.ones = 0; place.counted = false; place.helped = false; setFb('');
   placeRebuild(); setPrompt(`${place.target} を つくろう。10の ぼうが いくつ、ばらが いくつ？`);
 });
 $('#pCheck').addEventListener('click', () => {
   const T = Math.floor(place.target / 10), U = place.target % 10, total = placeTotal();
   if (place.tens === T && place.ones === U) {
     setFb(`せいかい！ ${place.target} ＝ 10の ぼう ${T}ほん ＋ ばら ${U}こ`, 'ok');
-    stars++; store.set('msm-stars', String(stars)); renderStars();
+    if (!place.counted) { place.counted = true; recordSolved(!place.helped); }   // count each number once
   } else if (total === place.target) {
+    place.helped = true;
     setFb('かずは あっているよ。ばらが 10こ いじょう あるから、まとめてみよう。', 'hint');
   } else if (total < place.target) {
+    place.helped = true;
     setFb(`いまは ${total}。あと ${place.target - total} たりないよ。`, 'hint');
   } else {
+    place.helped = true;
     setFb(`いまは ${total}。${total - place.target} おおいよ。`, 'hint');
   }
 });
 
 /* ---------- chrome ---------- */
-function renderStars() { dom.stars.textContent = '★ ' + stars; }
+const pad2 = n => String(n).padStart(2, '0');
+function dayKey(d = new Date()) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }   // local time: the day changes at 0:00
+function renderStars() { const e = hist[dayKey()]; dom.stars.textContent = '★ ' + (e ? e.t : 0); }
+function recordSolved(unaided) {
+  const k = dayKey(), e = hist[k] || { t: 0, u: 0 };
+  e.t++; if (unaided) e.u++;
+  hist[k] = e;
+  const keys = Object.keys(hist).sort();
+  while (keys.length > 400) delete hist[keys.shift()];        // keep about the last 400 days
+  store.set('msm-history', JSON.stringify(hist));
+  renderStars();
+  if (!$('#histSheet').hidden) renderHist();
+}
+function renderHist() {
+  const wd = ['日', '月', '火', '水', '木', '金', '土'];
+  const e = hist[dayKey()] || { t: 0, u: 0 };
+  $('#histToday').textContent = e.t ? `きょう ${e.t}もん（たすけなし ${e.u}もん）` : 'きょうは まだ ありません';
+  const rows = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const r = hist[dayKey(d)] || { t: 0, u: 0 };
+    rows.push({ label: `${d.getMonth() + 1}/${d.getDate()}（${wd[d.getDay()]}）`, t: r.t, u: Math.min(r.u, r.t), today: i === 0 });
+  }
+  const max = Math.max(1, ...rows.map(r => r.t));
+  const list = $('#histList'); list.replaceChildren();
+  rows.forEach(r => {
+    const row = el('div', 'hrow' + (r.today ? ' is-today' : ''));
+    row.setAttribute('aria-label', `${r.label} ${r.t}もん、たすけなし ${r.u}もん`);
+    const bar = el('div', 'hbar');
+    const ok = el('i', 'hs-ok'), help = el('i', 'hs-help');
+    ok.style.width = (r.u / max * 100) + '%'; help.style.width = ((r.t - r.u) / max * 100) + '%';
+    bar.append(ok, help);
+    row.append(el('span', 'hd', r.label), bar, el('span', 'hn', r.t ? String(r.t) : '・'));
+    list.append(row);
+  });
+  const days = Object.keys(hist), sum = days.reduce((a, k) => a + hist[k].t, 0);
+  $('#histTotal').textContent = days.length ? `ぜんぶで ${sum}もん（${days.length}にち）。この たんまつ だけに のこります。` : 'この たんまつ だけに のこります。';
+}
+function histCsv() {
+  return ['日付,解いた数,助けなし数'].concat(Object.keys(hist).sort().map(k => `${k},${hist[k].t},${hist[k].u}`)).join('\n');
+}
 function setLevel(l) {
   level = l; store.set('msm-level', String(l));
   $('#lv1').setAttribute('aria-pressed', String(l === 1));
@@ -691,7 +804,7 @@ function setMode(m) {
   document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-pressed', String(t.dataset.mode === m)));
   resetProblemUI();
   const prob = m !== 'place';
-  dom.eqCard.hidden = !prob; $('#cherry').toggleAttribute('hidden', !prob); dom.probCtl.hidden = true; $('#btnSet').hidden = !prob; $('#btnSet').setAttribute('aria-pressed', 'false'); dom.placeTarget.hidden = prob; dom.placeBtns.hidden = prob; dom.onesVal.hidden = prob;
+  dom.eqCard.hidden = !prob; $('#cherry').toggleAttribute('hidden', !prob); dom.probCtl.hidden = true; $('#histSheet').hidden = true; $('#stars').setAttribute('aria-pressed', 'false'); $('#btnSet').hidden = !prob; $('#btnSet').setAttribute('aria-pressed', 'false'); dom.placeTarget.hidden = prob; dom.placeBtns.hidden = prob; dom.onesVal.hidden = prob;
   dom.totals.hidden = true;
   lastCustom = null;
   try { history.replaceState(null, '', '#' + m); } catch (e) {}
@@ -705,9 +818,35 @@ function setMode(m) {
   }
 }
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
-function setSheet(on) { dom.probCtl.hidden = !on; $('#btnSet').setAttribute('aria-pressed', String(on)); }
+function setSheet(on) {
+  dom.probCtl.hidden = !on; $('#btnSet').setAttribute('aria-pressed', String(on));
+  if (on) setHist(false);
+}
+function setHist(on) {
+  $('#histSheet').hidden = !on; $('#stars').setAttribute('aria-pressed', String(on));
+  if (on) { dom.probCtl.hidden = true; $('#btnSet').setAttribute('aria-pressed', 'false'); $('#histMsg').textContent = ''; $('#histText').hidden = true; renderHist(); }
+}
+$('#stars').addEventListener('click', () => setHist($('#histSheet').hidden));
+$('#histClose').addEventListener('click', () => setHist(false));
+$('#histCopy').addEventListener('click', async () => {
+  const text = histCsv(), ta = $('#histText'), msg = $('#histMsg');
+  try { await navigator.clipboard.writeText(text); ta.hidden = true; msg.textContent = 'コピーしました。メモなどに はりつけて ください。'; }
+  catch (e) { ta.hidden = false; ta.value = text; ta.focus(); ta.select(); msg.textContent = 'じどうでは コピーできませんでした。したの もじを ながおしして コピーして ください。'; }
+});
+let clearTimer = null;
+$('#histClear').addEventListener('click', () => {
+  const b = $('#histClear');
+  if (!b.dataset.armed) {                                  // first press only asks; the second press clears
+    b.dataset.armed = '1'; b.textContent = 'ほんとうに けす？（もういちど おす）';
+    clearTimer = setTimeout(() => { delete b.dataset.armed; b.textContent = 'きろくを けす'; }, 5000);
+    return;
+  }
+  clearTimeout(clearTimer); delete b.dataset.armed; b.textContent = 'きろくを けす';
+  hist = {}; store.set('msm-history', '{}'); renderStars(); renderHist(); $('#histMsg').textContent = 'きろくを けしました。';
+});
 $('#btnSet').addEventListener('click', () => setSheet(dom.probCtl.hidden));
-document.addEventListener('keydown', e => { if (e.key === 'Escape') setSheet(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { setSheet(false); setHist(false); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) renderStars(); });   // the day may have changed
 $('#lv1').addEventListener('click', () => { setLevel(1); lastCustom = null; setSheet(false); nextProblem(); });
 $('#lv2').addEventListener('click', () => { setLevel(2); lastCustom = null; setSheet(false); nextProblem(); });
 
@@ -735,12 +874,14 @@ $('#btnAuto').addEventListener('click', () => {
 });
 
 // iPad (portrait): there is room to spare, so enlarge the whole UI as much as fits the screen.
-// 710 = tallest content (e.g. 88＋9) and 560 = the app's width, both at normal size.
+// 800 = tallest content (subtraction with the number pad, ~790) and 560 = the app's width, both at normal size.
 function fitTablet() {
   const w = window.innerWidth, h = window.innerHeight;
   let z = 1;
-  if (w >= 700 && h >= w) z = Math.max(1, Math.min(1.6, (h - 12) / 710, (w - 32) / 560));
+  if (w >= 700 && h >= w) z = Math.max(1, Math.min(1.6, (h - 12) / 800, (w - 32) / 560));
   $('.app').style.zoom = String(Math.round(z * 100) / 100);
+  const mh = Math.floor(h * 0.82 / z) + 'px';
+  dom.probCtl.style.maxHeight = mh; $('#histSheet').style.maxHeight = mh;
 }
 window.addEventListener('resize', fitTablet);
 window.addEventListener('orientationchange', fitTablet);
