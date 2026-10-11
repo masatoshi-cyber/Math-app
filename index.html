@@ -110,6 +110,7 @@ h1 { font-size: 16px; margin: 0; letter-spacing: .02em; min-width: 0; overflow: 
 .panel h2 { font-size: 14px; margin: 0 0 3px; color: var(--ink); font-weight: 700; line-height: 1.3; }
 .panel h2 small { display: inline; margin-left: 5px; font-size: 11px; color: var(--muted); font-weight: 400; }
 .board > .panel:first-child h2 small { display: block; margin-left: 0; }
+.panel.focus { box-shadow: inset 0 0 0 4px var(--ten); }   /* 「ぜんぶで いくつ？」: look at both the かたまり and the ばら */
 .panel .none { color: var(--muted); opacity: .6; margin: 12px 0 0; text-align: center; font-size: 14px; }
 #tens { display: flex; flex-direction: column; gap: 2px; }
 /* a lump of ten: ten cells held together by one frame; the lines between the cells show the ten, split 5 + 5 */
@@ -454,6 +455,7 @@ function makeFrame(n, c) {
 }
 function draw() {
   dom.tens.replaceChildren(); dom.ones.replaceChildren();
+  dom.tens.parentElement.classList.toggle('focus', !!scene.focusTens); dom.ones.parentElement.classList.toggle('focus', !!scene.focusOnes);
   if (!scene.tens.length) dom.tens.append(el('p', 'none', 'なし'));
   scene.tens.forEach(t => {
     const b = el(t.tap ? 'button' : 'div', 'bar' + (t.pulse ? ' pulse' : ''));
@@ -643,7 +645,9 @@ async function runAdd(a, b) {
   scene.frames = [scene.frames[1]];   // keep the orange frame so the moved dots stay as dashed outlines
   draw();
   const q = d > 0 ? `10の かたまりが ${t + 1}こ、ばらが ${d}こ。ぜんぶで いくつ？` : `10の かたまりが ${t + 1}こ。ぜんぶで いくつ？`;
+  scene.focusTens = true; scene.focusOnes = d > 0; draw();      // the last question is about the かたまり and the ばら
   await ask(q, res, `10の かたまり ${t + 1}こは ${(t + 1) * 10}。${d > 0 ? `それに ${d} を たそう。` : ''}`);
+  scene.focusTens = scene.focusOnes = false; draw();
   if (my !== runId) return;
   finish(`${a} ＋ ${b} ＝ ${res}`, res, [a, '＋', b]);
 }
@@ -683,7 +687,9 @@ async function runSub(a, b) {
   }
   ten.focus = null; draw();
   if (t > 1) {
+    scene.focusTens = scene.focusOnes = true; draw();
     await ask(`10の かたまりが ${t - 1}こ、ばらが ${ones}こ。ぜんぶで いくつ？`, res, `10の かたまり ${t - 1}こは ${(t - 1) * 10}。それに ${ones} を たそう。`);
+    scene.focusTens = scene.focusOnes = false; draw();
     if (my !== runId) return;
   }
   finish(`${a} − ${b} ＝ ${res}`, res, [a, '−', b]);
