@@ -6,7 +6,7 @@
 <title>10のまとまり さんすう</title>
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* Layout: one column, big touch targets. Board (10のぼう / ばら) sits between the equation and the number pad. */
+/* Layout: one column, big touch targets. Board (10の かたまり / ばら) sits between the equation and the number pad. */
 :root {
   --bg: #eef1f4;
   --surface: #ffffff;
@@ -16,6 +16,7 @@
   --line: #cdd6de;
   --ten: #1c6e8c;
   --ten-ink: #ffffff;
+  --ten-soft: #b9dbe8;
   --blue: #2f6ad0;
   --orange: #cf7410;
   --green: #2a9560;
@@ -27,13 +28,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #12181e; --surface: #1b242c; --soft: #222e38; --ink: #e6edf2; --muted: #9db0bf; --line: #33424e;
-    --ten: #4fb0d1; --ten-ink: #0c1a22; --blue: #6f9cf0; --orange: #f0a64a; --green: #4cc088; --ok: #5fd29a; --warn: #f19a5f; --alert: #ff6b6b;
+    --ten: #4fb0d1; --ten-ink: #0c1a22; --ten-soft: #1d4b5e; --blue: #6f9cf0; --orange: #f0a64a; --green: #4cc088; --ok: #5fd29a; --warn: #f19a5f; --alert: #ff6b6b;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #12181e; --surface: #1b242c; --soft: #222e38; --ink: #e6edf2; --muted: #9db0bf; --line: #33424e;
-  --ten: #4fb0d1; --ten-ink: #0c1a22; --blue: #6f9cf0; --orange: #f0a64a; --green: #4cc088; --ok: #5fd29a; --warn: #f19a5f; --alert: #ff6b6b;
+  --ten: #4fb0d1; --ten-ink: #0c1a22; --ten-soft: #1d4b5e; --blue: #6f9cf0; --orange: #f0a64a; --green: #4cc088; --ok: #5fd29a; --warn: #f19a5f; --alert: #ff6b6b;
   color-scheme: dark;
 }
 
@@ -72,10 +73,11 @@ h1 { font-size: 16px; margin: 0; letter-spacing: .02em; min-width: 0; overflow: 
 .card { background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; min-width: 0; }
 
 /* equation + sakuranbo */
-.eqrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.eqrow { margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .eq { display: flex; align-items: baseline; gap: 8px; font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; flex-wrap: nowrap; white-space: nowrap; }
 .eq .op { color: var(--muted); }
 .hl { color: var(--blue); border-bottom: 4px solid var(--blue); }
+.od { display: inline-block; width: 1em; height: 1em; background: var(--orange); border-radius: 50%; vertical-align: -0.15em; margin-inline: 2px; }
 .bc { display: inline-block; width: 1.05em; height: 1.05em; border: 3px solid var(--orange); border-radius: 50%; vertical-align: -0.18em; margin-inline: 2px; }
 .hl3 { color: var(--green); border-bottom: 4px solid var(--green); }
 .hl2 { color: var(--orange); border-bottom: 4px solid var(--orange); }
@@ -95,6 +97,9 @@ h1 { font-size: 16px; margin: 0; letter-spacing: .02em; min-width: 0; overflow: 
 #cherry .cA { fill: var(--surface); stroke: var(--ten); }
 #cherry .cB { fill: var(--surface); stroke: var(--blue); }
 #cherry .cF { fill: var(--surface); stroke: var(--ok); }
+#cherry.focus { box-shadow: 0 0 0 4px var(--orange); border-radius: 10px; background: var(--surface); }   /* 「○は いくつ？」: look at the sakuranbo */
+#cherry #sFocus, #cherry #sFocus2 { fill: none; stroke: var(--orange); stroke-width: 5; }   /* 「10 − ○」: the part of the subtraction sakuranbo to look at */
+#cherry.focus .cR { stroke-width: 6; }
 #cherry text.lab { fill: var(--orange); font-size: 21px; text-anchor: start; }
 #cherry text.op { fill: var(--muted); font-size: 24px; }
 #cherry text { font-size: 25px; font-weight: 700; fill: var(--ink); text-anchor: middle; dominant-baseline: central; font-family: var(--font); }
@@ -104,10 +109,13 @@ h1 { font-size: 16px; margin: 0; letter-spacing: .02em; min-width: 0; overflow: 
 .panel { background: var(--soft); border-radius: 10px; padding: 6px 8px; min-height: 130px; min-width: 0; }
 .panel h2 { font-size: 14px; margin: 0 0 3px; color: var(--ink); font-weight: 700; line-height: 1.3; }
 .panel h2 small { display: inline; margin-left: 5px; font-size: 11px; color: var(--muted); font-weight: 400; }
+.board > .panel:first-child h2 small { display: block; margin-left: 0; }
 .panel .none { color: var(--muted); opacity: .6; margin: 12px 0 0; text-align: center; font-size: 14px; }
 #tens { display: flex; flex-direction: column; gap: 2px; }
-.bar { display: flex; gap: 2px; padding: 2px; border: 0; border-radius: 5px; background: var(--ten); height: 15px; width: 100%; max-width: 220px; }
-.bar i { flex: 1; background: var(--ten-ink); opacity: .28; border-radius: 2px; }
+/* a lump of ten: ten cells held together by one frame; the lines between the cells show the ten, split 5 + 5 */
+.bar { display: flex; gap: 3px; padding: 2px 3px; border: 0; border-radius: 5px; background: var(--ten); height: 15px; width: 100%; max-width: 220px; }
+.bar i { flex: 1; background: var(--ten-soft); border-radius: 2px; }
+.bar i:nth-child(5) { margin-right: 3px; }
 button.bar { cursor: pointer; }
 #ones { display: flex; flex-direction: column; gap: 5px; }
 .frame { display: grid; grid-template-columns: repeat(5, minmax(0, 34px)); justify-content: center; gap: 4px; padding: 4px; border: 2px solid var(--line); border-radius: 6px; background: var(--surface); }
@@ -127,9 +135,9 @@ button.bar { cursor: pointer; }
 .panel h2.hasval { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .panel h2 .val { font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--blue); }
 .panel h2 .val small { display: inline; font-size: 13px; margin-left: 2px; color: var(--muted); }
-.placegrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.placegrid .btn { padding-inline: 4px; min-height: 44px; font-size: 16px; }
-#pBundle { grid-column: span 2; }
+.placegrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.placegrid .btn { grid-column: span 2; padding-inline: 4px; min-height: 44px; font-size: 16px; }
+#pBundle, #pBreak { grid-column: span 3; }
 #placeTarget { padding-block: 6px; }
 .tgt { display: flex; align-items: baseline; gap: 8px; }
 #placeTarget .target { font-size: 28px; line-height: 1.2; }
@@ -139,7 +147,7 @@ button.bar { cursor: pointer; }
 
 /* coach */
 .coach { display: flex; align-items: flex-start; gap: 8px; }
-#promptText { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; margin: 0; line-height: 1.45; min-height: 2.9em; }
+#promptText { white-space: pre-line; flex: 1; min-width: 0; font-size: 16px; font-weight: 700; margin: 0; line-height: 1.45; min-height: 2.9em; }
 .speak { flex: none; width: 44px; min-height: 36px; padding: 0; border-radius: 18px; border: 2px solid var(--ten); background: var(--surface); font-size: 17px; }
 #fb { min-height: 1.4em; margin: 2px 0 0; font-weight: 700; font-size: 15px; }
 #fb.ok { color: var(--ok); }
@@ -218,7 +226,7 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
   .panel { min-height: 104px; padding: 5px 6px; }
   .frame { grid-template-columns: repeat(5, minmax(0, 27px)); gap: 3px; padding: 3px; }
   #ones { gap: 4px; }
-  .bar { height: 13px; padding: 2px; }
+  .bar { height: 13px; padding: 2px 3px; }
   #promptText { font-size: 15px; }
   #fb { min-height: 1.3em; font-size: 14px; }
   .key, .key.del { min-height: 38px; }
@@ -237,7 +245,7 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
   #cherry[data-m="sub"] { width: 72px; }
   .panel { min-height: 90px; }
   .frame { grid-template-columns: repeat(5, minmax(0, 22px)); }
-  .bar { height: 11px; padding: 1px 2px; }
+  .bar { height: 11px; padding: 1px 3px; }
   #promptText { font-size: 14px; }
   .key, .key.del { min-height: 34px; }
   .ans span { width: 32px; height: 34px; font-size: 20px; }
@@ -269,14 +277,6 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
 
   <div class="cols">
     <div class="colL">
-      <section class="card" id="eqCard" hidden>
-        <div class="eqrow">
-          <div class="eq" id="eq" aria-live="polite">
-            <span id="eqA">8</span><span class="op" id="eqOp">＋</span><span id="eqB" class="hl2">5</span><span class="op">＝</span><span class="res" id="eqR">□</span>
-          </div>
-        </div>
-      </section>
-
       <section class="card" id="placeTarget" aria-label="つくる かず" hidden>
         <div class="challenge">
           <div class="tgt"><span class="note">この かずを つくろう</span><span class="target" id="pTarget">25</span></div>
@@ -289,7 +289,7 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
 
       <section class="card" id="boardCard" aria-label="ブロック">
         <div class="board">
-          <div class="panel"><h2>10の ぼう<small>十のくらい</small></h2><div id="tens"></div></div>
+          <div class="panel"><h2>10の かたまり<small>十のくらい</small></h2><div id="tens"></div></div>
           <div class="panel"><h2 class="hasval"><span>ばら<small>一のくらい</small></span><b class="val" id="onesVal" hidden><span id="onesNum">0</span><small>こ</small></b></h2><div id="ones"></div></div>
         </div>
         <p class="totals" id="totals" hidden></p>
@@ -301,13 +301,18 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
           <button class="btn" type="button" id="pSub">− ばら 1こ</button>
           <button class="btn" type="button" id="pClear">ぜんぶ けす</button>
           <button class="btn primary" type="button" id="pBundle">10こを まとめる</button>
-          <button class="btn" type="button" id="pBreak">ぼうを ほどく</button>
+          <button class="btn" type="button" id="pBreak">かたまりを ほどく</button>
         </div>
       </section>
     </div>
 
     <div class="colR">
       <section class="card">
+        <div class="eqrow" id="eqCard" hidden>
+          <div class="eq" id="eq" aria-live="polite">
+            <span id="eqA">8</span><span class="op" id="eqOp">＋</span><span id="eqB" class="hl2">5</span><span class="op">＝</span><span class="res" id="eqR">□</span>
+          </div>
+        </div>
         <div class="coach">
           <p id="promptText" aria-live="polite">よみこみちゅう…</p>
           <svg id="cherry" viewBox="0 0 150 90" role="img" aria-label="さくらんぼ けいさん">
@@ -315,6 +320,8 @@ details summary { cursor: pointer; font-weight: 700; min-height: 40px; display: 
             <circle class="cT" cx="75" cy="22" r="19"/><text id="cT" x="75" y="23"></text>
             <circle class="cL" cx="35" cy="64" r="21"/><text id="cL" x="35" y="65"></text>
             <circle class="cR" cx="115" cy="64" r="21"/><text id="cR" x="115" y="65"></text>
+            <rect id="sFocus" x="6" y="38" width="80" height="112" rx="12" hidden/>
+            <rect id="sFocus2" x="10" y="103" width="130" height="88" rx="12" hidden/>
             <g id="sA" hidden>
               <line x1="35" y1="86" x2="35" y2="108"/><text id="sxM" class="lab" x="49" y="98"></text>
               <circle class="cA" cx="35" cy="126" r="17"/><text id="sxA" x="35" y="127"></text>
@@ -431,10 +438,13 @@ function setPrompt(t, speak = true) {
     if (m) dom.prompt.append(el('span', { '«': 'hl', '‹': 'hl2', '〔': 'hl3' }[m[1]], m[2]));
     else part.split('○').forEach((seg, j) => {
       if (j) { const c = el('span', 'bc'); c.setAttribute('role', 'img'); c.setAttribute('aria-label', 'まる'); dom.prompt.append(c); }
-      if (seg) dom.prompt.append(document.createTextNode(seg));
+      seg.split('●').forEach((s2, k) => {                   // ● = a filled orange dot, like the orange ones
+        if (k) { const d = el('span', 'od'); d.setAttribute('role', 'img'); d.setAttribute('aria-label', 'オレンジの まる'); dom.prompt.append(d); }
+        if (s2) dom.prompt.append(document.createTextNode(s2));
+      });
     });
   });
-  if (speak && autoRead) speakText(t.replace(/[«»‹›〔〕]/g, ''));
+  if (speak && autoRead) speakText(t.replace(/[«»‹›〔〕]/g, '').replace(/[●○]/g, 'まる'));
 }
 function setFb(t, cls) { dom.fb.textContent = t || ''; dom.fb.className = cls || ''; }
 
@@ -450,7 +460,7 @@ function draw() {
     for (let i = 0; i < 10; i++) b.append(el('i'));
     if (t.tap) {
       b.type = 'button';
-      b.setAttribute('aria-label', '10の ぼう。タップすると ばらに ほどけます');
+      b.setAttribute('aria-label', '10の かたまり。タップすると ばらに ほどけます');
       b.addEventListener('click', t.tap);
     }
     dom.tens.append(b);
@@ -479,7 +489,7 @@ function setEq(a, op, b, r) {
 function setCherry(top, left, right, kind) {
   const svg = $('#cherry');
   svg.dataset.m = kind || 'add';
-  svg.setAttribute('viewBox', kind === 'sub' ? '0 0 150 190' : '0 0 150 90');   // subtraction has two more rows
+  svg.setAttribute('viewBox', kind === 'sub' ? '0 0 150 194' : '0 0 150 90');   // subtraction has two more rows
   if (kind !== 'sub') setCherrySub({});
   svg.style.visibility = top == null ? 'hidden' : 'visible';   // keeps its space so the prompt does not reflow
   $('#cT').textContent = top == null ? '' : top;
@@ -589,7 +599,7 @@ function tapBar(text) {
 
 /* ---------- problems ---------- */
 function resetProblemUI() {
-  showPad(false); dom.actions.replaceChildren(); setFb(''); needBoard(false); helped = false;
+  showPad(false); dom.actions.replaceChildren(); setFb(''); needBoard(false); helped = false; $('#cherry').classList.remove('focus'); $('#sFocus').setAttribute('hidden', ''); $('#sFocus2').setAttribute('hidden', '');
 }
 function finish(summary, res, eqArgs) {
   setEq(eqArgs[0], eqArgs[1], eqArgs[2], res);
@@ -621,17 +631,19 @@ async function runAdd(a, b) {
   scene.frames[1].focus = null; draw();
   if (my !== runId) return;
   if (d > 0) {
+    $('#cherry').classList.add('focus');            // the question is about the sakuranbo: draw attention to it
     await ask(`‹${b}› を 〔${need}〕 と ○に わけたよ。○は いくつ？`, d, `${b} − ${need} を けいさんしよう。`);
+    $('#cherry').classList.remove('focus');
     if (my !== runId) return;
   }
   setCherry(b, need, d);
-  await act('10こ あつまったね。10の ぼうに まとめよう。', '10こを まとめる');
+  await act('10こ あつまったね。10の かたまりに まとめよう。', '10こを まとめる');
   if (my !== runId) return;
   scene.tens.push({});
   scene.frames = [scene.frames[1]];   // keep the orange frame so the moved dots stay as dashed outlines
   draw();
-  const q = d > 0 ? `10の ぼうが ${t + 1}ほん、ばらが ${d}こ。ぜんぶで いくつ？` : `10の ぼうが ${t + 1}ほん。ぜんぶで いくつ？`;
-  await ask(q, res, `10の ぼう ${t + 1}ほんは ${(t + 1) * 10}。${d > 0 ? `それに ${d} を たそう。` : ''}`);
+  const q = d > 0 ? `10の かたまりが ${t + 1}こ、ばらが ${d}こ。ぜんぶで いくつ？` : `10の かたまりが ${t + 1}こ。ぜんぶで いくつ？`;
+  await ask(q, res, `10の かたまり ${t + 1}こは ${(t + 1) * 10}。${d > 0 ? `それに ${d} を たそう。` : ''}`);
   if (my !== runId) return;
   finish(`${a} ＋ ${b} ＝ ${res}`, res, [a, '＋', b]);
 }
@@ -644,7 +656,7 @@ async function runSub(a, b) {
   scene = { tens: Array.from({ length: t }, () => ({})), frames: x > 0 ? [makeFrame(x, 'blue')] : [] };
   if (x > 0) scene.frames[0].focus = 'blue';            // look at the ones (blue)
   draw();
-  await tapBar(`${x > 0 ? `${a} の 一のくらいは «${x}»。` : ''}ばらが たりないね。10の ぼうを 1ほん タップして ほどこう。`);
+  await tapBar(`${a} の 一のくらいは «${x}»。\n«${x}» から ‹${b}› は ひけないね。\n10の かたまりを タップして かりてこよう。`);
   if (x > 0) scene.frames[0].focus = null;
   if (my !== runId) return;
   const ten = makeFrame(10, 'ten');
@@ -653,22 +665,25 @@ async function runSub(a, b) {
   if (x > 0) { setCherry(10 + x, 10, x, 'sub'); setCherrySub({ label: `−${b}`, a: '' }); }   // 10 −b → ○
   ten.focus = 'orange';                                   // the dots to take are in the ten frame
   draw();
-  await tapN(`ほどいた 10こから ‹${b}›こ、オレンジの ●を タップして とろう。`, ten.slice(0, b));
+  await tapN(`かりてきた 10こから ‹${b}›こ、オレンジの ●を タップして とろう。`, ten.slice(0, b));
   ten.focus = 'ten'; draw();                              // 10 − b: look at what is left of the ten
   if (my !== runId) return;
-  await ask(`10 − ‹${b}› ＝ いくつ？`, left, `10こから ${b}こ とると のこりは？`);
+  $('#sFocus').toggleAttribute('hidden', !(x > 0));        // frame the 10 − b → ○ part of the sakuranbo
+  await ask(`かりてきた 10の かたまりの のこりは？\n10 − ‹${b}› ＝ いくつ？`, left, `10こから ${b}こ とると のこりは？`);
   if (my !== runId) return;
-  if (x > 0) setCherrySub({ label: `−${b}`, a: left, x, f: '' });   // 10 −b → 2, then 2 ＋ 3 → ○
+  $('#sFocus').toggleAttribute('hidden', true);
+  if (x > 0) setCherrySub({ label: `−${b}`, a: left, x, f: '' });
+  $('#sFocus2').toggleAttribute('hidden', !(x > 0));       // frame left + ones → ○   // 10 −b → 2, then 2 ＋ 3 → ○
   if (x > 0) {
     scene.frames[1].focus = 'blue'; draw();               // the left-over ten dots + the ones
-    await ask(`のこりの ${left}こと、もとの ばら «${x}»こを あわせると いくつ？`, ones, `${left} ＋ ${x} を けいさんしよう。`);
-    scene.frames[1].focus = null;
+    await ask(`かりてきた 10の のこり ${left}こと、もとの ばら «${x}»こを あわせると いくつ？`, ones, `${left} ＋ ${x} を けいさんしよう。`);
+    scene.frames[1].focus = null; $('#sFocus2').toggleAttribute('hidden', true);
     if (my !== runId) return;
     setCherrySub({ label: `−${b}`, a: left, x, f: ones });
   }
   ten.focus = null; draw();
   if (t > 1) {
-    await ask(`10の ぼうが ${t - 1}ほん、ばらが ${ones}こ。ぜんぶで いくつ？`, res, `10の ぼう ${t - 1}ほんは ${(t - 1) * 10}。それに ${ones} を たそう。`);
+    await ask(`10の かたまりが ${t - 1}こ、ばらが ${ones}こ。ぜんぶで いくつ？`, res, `10の かたまり ${t - 1}こは ${(t - 1) * 10}。それに ${ones} を たそう。`);
     if (my !== runId) return;
   }
   finish(`${a} − ${b} ＝ ${res}`, res, [a, '−', b]);
@@ -703,7 +718,7 @@ function placeRebuild() {
   dom.totals.hidden = false;
   dom.onesVal.hidden = false; dom.onesNum.textContent = place.ones;
   dom.totals.replaceChildren(
-    document.createTextNode('10の ぼう '), el('b', '', place.tens), document.createTextNode(' ほん ＋ ばら '),
+    document.createTextNode('10の かたまり '), el('b', '', place.tens), document.createTextNode(' こ ＋ ばら '),
     el('b', '', place.ones), document.createTextNode(' こ ＝ '), el('b', '', total)
   );
   $('#pAdd').disabled = total >= 99;
@@ -716,7 +731,7 @@ function placeRebuild() {
 function startPlace() {
   place = { tens: 1, ones: 3, target: rnd(12, 59), counted: false, helped: false };
   placeRebuild();
-  setPrompt('ばらを ふやして、10こに なったら「まとめる」。ぼうを タップすると ばらに もどるよ。');
+  setPrompt('ばらを ふやして、10こに なったら「まとめる」。かたまりを タップすると ばらに もどるよ。');
 }
 $('#pAdd').addEventListener('click', () => {
   if (placeTotal() >= 99) return;
@@ -730,12 +745,12 @@ $('#pBreak').addEventListener('click', () => { if (place.tens >= 1 && place.ones
 $('#pClear').addEventListener('click', () => { place.tens = 0; place.ones = 0; setFb(''); placeRebuild(); });
 $('#pNew').addEventListener('click', () => {
   place.target = rnd(12, 59); place.tens = 0; place.ones = 0; place.counted = false; place.helped = false; setFb('');
-  placeRebuild(); setPrompt(`${place.target} を つくろう。10の ぼうが いくつ、ばらが いくつ？`);
+  placeRebuild(); setPrompt(`${place.target} を つくろう。10の かたまりが いくつ、ばらが いくつ？`);
 });
 $('#pCheck').addEventListener('click', () => {
   const T = Math.floor(place.target / 10), U = place.target % 10, total = placeTotal();
   if (place.tens === T && place.ones === U) {
-    setFb(`せいかい！ ${place.target} ＝ 10の ぼう ${T}ほん ＋ ばら ${U}こ`, 'ok');
+    setFb(`せいかい！ ${place.target} ＝ 10の かたまり ${T}こ ＋ ばら ${U}こ`, 'ok');
     if (!place.counted) { place.counted = true; recordSolved(!place.helped); }   // count each number once
   } else if (total === place.target) {
     place.helped = true;
